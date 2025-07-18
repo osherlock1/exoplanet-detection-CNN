@@ -26,3 +26,36 @@ K2 Data: https://lweb.cfa.harvard.edu/~avanderb/k2.html
 
 Kepler Data: https://archive.stsci.edu/kepler/publiclightcurves.html
 
+# Data Preparation
+
+To prepare the raw Kepler/K2 light curves for input into a machine learning model, we applied several preprocessing steps to enhance the signal of potential transits and make the data suitable for training:
+
+### 1. Phase Folding
+
+Most exoplanet transits are periodic events. For example, if a planet orbits a star every ~10 days, we expect to see a dip in brightness every ~10 days.  
+To align these periodic events, we **phase fold** each light curve by folding the time axis over a known or candidate orbital period.  
+This results in a plot where multiple transits line up on top of each other, making the dip more prominent.
+
+
+### 2. Binning
+
+After folding, we **bin** the data into fixed-length segments (e.g., 200 points per curve).  
+This step smooths out noise and creates a uniform input size for the CNN, which expects fixed-size 1D vectors.
+
+We typically use **equal-width binning**, where the folded phase curve is divided into equal intervals, and the median or average flux in each bin is computed.
+
+### 3. Normalization
+
+Each light curve is **normalized** using standard scaling to have zero mean and unit variance.  
+This prevents the model from learning irrelevant differences in baseline brightness or flux units, and accelerates convergence during training.
+
+### 4. Outlier Removal
+
+For robustness, we optionally remove NaNs, flagged data points, and outliers outside of a plausible flux range to account for instrument error and random particle phenomenon.  
+
+---
+
+These steps transform raw, irregular light curves into clean, aligned, and compact representations that emphasize transit features—ideal for feeding into a CNN-based classifier.
+
+
+
